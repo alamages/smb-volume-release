@@ -8,6 +8,8 @@ templates:
   credhub.json.erb: credhub.json
   services.json.erb: config/services.json
   start.sh.erb: start.sh
+  bbr/post-restore-unlock.erb: bin/bbr/post-restore-unlock
+  bbr/metadata.erb: bin/bbr/metadata
 
 packages:
   - smbbroker

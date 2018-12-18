@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+<% if spec.bootstrap %>
+
+set -eu
+
+export PATH="/var/vcap/packages/cf-cli-6-linux/bin:$PATH"
+export CF_HOME="$PWD/home/cf"
+export CF_DIAL_TIMEOUT="<%= p('cf.dial_timeout') %>"
+
+mkdir -p "$CF_HOME"
+
+DOMAIN="<%= p('domain') %>"
+API_ENDPOINT="https://api.$DOMAIN"
+ORG="<%= p('organization') %>"
+SPACE="<%= p('space') %>"
+APP_NAME="<%= p('app_name') %>"
+
+
+function authenticate() {
+  cf api "$API_ENDPOINT" <% if p('skip_cert_verify') %>--skip-ssl-validation<% end %>
+
+  <% if_p('cf.client_id', 'cf.client_secret') do |client_id, client_secret| %>
+  cf auth "<%= client_id %>" "<%= client_secret %>" --client-credentials
+  <% end.else do %>
+  cf auth "<%= p('cf.admin_user') %>" "<%= p('cf.admin_password') %>"
+  <% end %>
+}
+
+function check_app_exists() {
+  if ! cf target -o "$ORG" -s "$SPACE" ; then
+    echo "SMB org '$ORG' and space '$SPACE' not found; exiting"
+    exit 0
+  fi
+
+  if ! cf app "$APP_NAME" ; then
+    echo "SMB app '$APP_NAME' not found; exiting"
+    exit 0
+  fi
+}
+
+cf -v
+
+authenticate
+check_app_exists
+/var/vcap/jobs/smbbrokerpush/bin/run
+
+<% end %>
