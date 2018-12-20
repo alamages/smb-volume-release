@@ -16,7 +16,6 @@ ORG="<%= p('organization') %>"
 SPACE="<%= p('space') %>"
 APP_NAME="<%= p('app_name') %>"
 
-
 function authenticate() {
   cf api "$API_ENDPOINT" <% if p('skip_cert_verify') %>--skip-ssl-validation<% end %>
 
